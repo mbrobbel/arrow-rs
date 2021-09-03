@@ -33,7 +33,11 @@ fn hash_(data: &[u8], seed: u32) -> u32 {
         }
     }
 
-    #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+    #[cfg(any(
+        target_arch = "aarch64",
+        target_arch = "arm",
+        target_arch = "powerpc64"
+    ))]
     unsafe {
         murmur_hash2_64a(data, seed as u64) as u32
     }
