@@ -264,7 +264,7 @@ fn take_nulls<I: ArrowPrimitiveType>(
 }
 
 #[inline(never)]
-fn take_native<T: ArrowNativeType, I: ArrowPrimitiveType>(
+fn take_native<T: ArrowNativeType + Default, I: ArrowPrimitiveType>(
     values: &[T],
     indices: &PrimitiveArray<I>,
 ) -> ScalarBuffer<T> {

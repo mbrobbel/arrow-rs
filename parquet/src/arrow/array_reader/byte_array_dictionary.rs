@@ -156,7 +156,7 @@ where
 
 impl<K, V> ArrayReader for ByteArrayDictionaryReader<K, V>
 where
-    K: FromBytes + ScalarValue + Ord + ArrowNativeType,
+    K: FromBytes + ScalarValue + Ord + ArrowNativeType + Default,
     V: ScalarValue + OffsetSizeTrait,
 {
     fn as_any(&self) -> &dyn Any {
@@ -226,7 +226,7 @@ struct DictionaryDecoder<K, V> {
 
 impl<K, V> ColumnValueDecoder for DictionaryDecoder<K, V>
 where
-    K: FromBytes + ScalarValue + Ord + ArrowNativeType,
+    K: FromBytes + ScalarValue + Ord + ArrowNativeType + Default,
     V: ScalarValue + OffsetSizeTrait,
 {
     type Slice = DictionaryBuffer<K, V>;

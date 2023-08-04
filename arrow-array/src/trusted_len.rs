@@ -25,7 +25,7 @@ use arrow_buffer::{bit_util, ArrowNativeType, Buffer, MutableBuffer};
 #[inline]
 pub(crate) unsafe fn trusted_len_unzip<I, P, T>(iterator: I) -> (Buffer, Buffer)
 where
-    T: ArrowNativeType,
+    T: ArrowNativeType + Default,
     P: std::borrow::Borrow<Option<T>>,
     I: Iterator<Item = P>,
 {

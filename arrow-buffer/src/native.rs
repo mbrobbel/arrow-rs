@@ -19,7 +19,10 @@ use crate::i256;
 use half::f16;
 
 mod private {
+    use crate::ArrowNativeType;
+
     pub trait Sealed {}
+    impl<T: ArrowNativeType> Sealed for T {}
 }
 
 /// Trait expressing a Rust type that has the same in-memory representation
@@ -45,7 +48,7 @@ mod private {
 ///
 /// Due to the above restrictions, this trait is sealed to prevent accidental misuse
 pub trait ArrowNativeType:
-    std::fmt::Debug + Send + Sync + Copy + PartialOrd + Default + private::Sealed + 'static
+    std::fmt::Debug + Send + Sync + Copy + PartialOrd + private::Sealed + 'static
 {
     /// Convert native integer type from usize
     ///
@@ -102,7 +105,6 @@ pub trait ArrowNativeType:
 
 macro_rules! native_integer {
     ($t: ty $(, $from:ident)*) => {
-        impl private::Sealed for $t {}
         impl ArrowNativeType for $t {
             #[inline]
             fn from_usize(v: usize) -> Option<Self> {
@@ -145,14 +147,16 @@ native_integer!(i16);
 native_integer!(i32, from_i32);
 native_integer!(i64, from_i64);
 native_integer!(i128, from_i128);
+native_integer!(isize);
 native_integer!(u8);
 native_integer!(u16);
 native_integer!(u32);
 native_integer!(u64);
+native_integer!(u128);
+native_integer!(usize);
 
 macro_rules! native_float {
     ($t:ty, $s:ident, $as_usize: expr, $i:ident, $usize_as: expr) => {
-        impl private::Sealed for $t {}
         impl ArrowNativeType for $t {
             #[inline]
             fn from_usize(_: usize) -> Option<Self> {
@@ -186,7 +190,6 @@ native_float!(f16, self, self.to_f32() as _, i, f16::from_f32(i as _));
 native_float!(f32, self, self as _, i, i as _);
 native_float!(f64, self, self as _, i, i as _);
 
-impl private::Sealed for i256 {}
 impl ArrowNativeType for i256 {
     fn from_usize(u: usize) -> Option<Self> {
         Some(Self::from_parts(u as u128, 0))
@@ -210,6 +213,50 @@ impl ArrowNativeType for i256 {
 
     fn to_isize(self) -> Option<isize> {
         self.to_i128()?.try_into().ok()
+    }
+}
+
+impl ArrowNativeType for () {
+    fn from_usize(_: usize) -> Option<Self> {
+        None
+    }
+
+    fn as_usize(self) -> usize {
+        unimplemented!()
+    }
+
+    fn usize_as(_: usize) -> Self {
+        unimplemented!()
+    }
+
+    fn to_usize(self) -> Option<usize> {
+        None
+    }
+
+    fn to_isize(self) -> Option<isize> {
+        None
+    }
+}
+
+impl<const N: usize, T: ArrowNativeType> ArrowNativeType for [T; N] {
+    fn from_usize(_: usize) -> Option<Self> {
+        None
+    }
+
+    fn as_usize(self) -> usize {
+        unimplemented!()
+    }
+
+    fn usize_as(_: usize) -> Self {
+        unimplemented!()
+    }
+
+    fn to_usize(self) -> Option<usize> {
+        None
+    }
+
+    fn to_isize(self) -> Option<isize> {
+        None
     }
 }
 

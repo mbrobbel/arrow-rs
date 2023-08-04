@@ -148,7 +148,10 @@ where
 
     /// Returns the maximum run-end encoded in the underlying buffer
     #[inline]
-    pub fn max_value(&self) -> usize {
+    pub fn max_value(&self) -> usize
+    where
+        E: Default,
+    {
         self.values().last().copied().unwrap_or_default().as_usize()
     }
 
@@ -175,7 +178,10 @@ where
     }
 
     /// Returns the physical index at which the logical array ends
-    pub fn get_end_physical_index(&self) -> usize {
+    pub fn get_end_physical_index(&self) -> usize
+    where
+        E: Default,
+    {
         if self.len == 0 {
             return 0;
         }

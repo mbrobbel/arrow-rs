@@ -38,7 +38,7 @@ use std::cmp::Ordering;
 /// Comparison of integer types is as per normal integer comparison rules, floating
 /// point values are compared as per IEEE 754's totalOrder predicate see [`f32::total_cmp`]
 ///
-pub trait ArrowNativeTypeOp: ArrowNativeType {
+pub trait ArrowNativeTypeOp: ArrowNativeType + Default {
     /// The additive identity
     const ZERO: Self;
 
