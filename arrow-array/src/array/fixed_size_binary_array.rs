@@ -789,7 +789,16 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "The child array cannot contain null values.")]
+    #[cfg_attr(
+        not(feature = "force_validate"),
+        should_panic(expected = "The child array cannot contain null values.")
+    )]
+    #[cfg_attr(
+        feature = "force_validate",
+        should_panic(
+            expected = "non-nullable child of type UInt8 contains nulls not present in parent"
+        )
+    )]
     fn test_fixed_size_binary_array_from_fixed_size_list_array_with_child_nulls_failed() {
         let values = [0_u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
         let values_data = ArrayData::builder(DataType::UInt8)

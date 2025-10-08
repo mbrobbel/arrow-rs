@@ -16,47 +16,33 @@
 # under the License.
 
 name: Prepare Rust Builder
-description: "Prepare Rust Build Environment"
+description: Prepare Rust Build Environment
 runs:
-  using: "composite"
+  using: composite
   steps:
-    - name: Cache Cargo
-      uses: actions/cache@v4
+    - uses: actions/cache@v4
       with:
-        # these represent dependencies downloaded by cargo
-        # and thus do not depend on the OS, arch nor rust version.
-        #
         # source https://github.com/actions/cache/blob/main/examples.md#rust---cargo
         path: |
-          /usr/local/cargo/bin/
-          /usr/local/cargo/registry/index/
-          /usr/local/cargo/registry/cache/
-          /usr/local/cargo/git/db/
-        key: cargo-cache3-${{ hashFiles('**/Cargo.toml') }}
-        restore-keys: cargo-cache3-
-    - name: Setup Rust toolchain
-      shell: bash
-      run: rustup install
-    - name: Generate lockfile
-      shell: bash
-      run: cargo fetch
-    - name: Install Build Dependencies
-      shell: bash
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+        key: cargo-cache-${{ hashFiles('**/Cargo.toml') }}
+        restore-keys: cargo-cache-
+    - uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
+    - shell: bash
       run: |
-        apt-get update
-        apt-get install -y protobuf-compiler
-    - name: Disable debuginfo generation
-      # Disable full debug symbol generation to speed up CI build and keep memory down
-      # "1" means line tables only, which is useful for panic tracebacks.
-      shell: bash
-      run: echo "RUSTFLAGS=-C debuginfo=1" >> $GITHUB_ENV
-    - name: Enable backtraces
-      shell: bash
-      run: echo "RUST_BACKTRACE=1" >> $GITHUB_ENV
-    - name: Disable incremental compilation
-      shell: bash
-      run: echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV
-    - name: Fixup git permissions
-      # https://github.com/actions/checkout/issues/766
-      shell: bash
-      run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        # Disable full debug symbol generation to speed up CI build and keep memory down
+        # "1" means line tables only, which is useful for panic tracebacks.
+        echo "RUSTFLAGS=-C debuginfo=1" >> $GITHUB_ENV
+
+        # Enable backtraces
+        echo RUST_BACKTRACE=1 >> $GITHUB_ENV
+
+        # Disable incremental compilation
+        echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV
+
+        # Enable sccache
+        echo SCCACHE_GHA_ENABLED=true >> $GITHUB_ENV
+        echo RUSTC_WRAPPER=sccache >> $GITHUB_ENV
